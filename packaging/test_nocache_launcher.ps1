@@ -46,3 +46,4 @@ if ((Get-Content -LiteralPath (Join-Path $oldCache 'PPSA38500.shaders')) -ne 'pr
     throw 'Existing cache was changed'
 }
 Write-Host 'PASS: saved path, fresh cache, original cache, process exit, stdout/stderr, and module resolution.'
+exit 0
