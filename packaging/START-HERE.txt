@@ -1,0 +1,51 @@
+GTA6 GAMEPLAY TEST 01 - COMPILED WINDOWS PACKAGE
+
+GOAL
+Reach controllable gameplay. Speed and visual quality are secondary.
+This is an experimental test build, not a confirmed gameplay fix.
+
+RUN IT
+1. Extract the entire ZIP to a NEW folder such as D:\Emulators\GTA6-Test01.
+2. Double-click START-GTA6.cmd. Enter the existing game folder or ELF/ZAR path
+   when prompted. Alternatively, drag the game folder onto START-GTA6.cmd.
+3. Let the game run. Compilation/readback can be slow. Close its window if a run
+   hangs; the log is kept in logs and opens in Notepad when the process ends.
+4. Send the complete log and describe the furthest point reached. Gameplay means
+   the scene updates and the character or camera responds to your controller.
+5. If it crashes or seems worse, try START-GTA6-BASELINE.cmd for a comparison
+   with the same patched executable and default graphics/timing settings.
+
+No Setup.cmd or copy from the old Kyty installation is needed for these two
+START launchers. The patched executable and its runtime files are bundled.
+
+FILES AND ROLLBACK
+The roughly 200 GB game remains at its current path. This package does not copy it.
+The launcher sets the working directory to patched, so Kyty's relative _SaveData
+and _PipelineCache folders are isolated from the original installation.
+The two START profiles share this new test save/cache folder. Existing launcher
+settings and saves are not imported. Return to your original Kyty folder to roll back.
+No system installation or registry change is made.
+
+BUILD DETAILS
+BUILD-RESULT.txt records the exact source commit, Windows runner, and checks.
+SHA256SUMS.txt covers the distributed files. The source changes and corresponding
+source archive are under source. Game files are not included.
+
+CHANGES IN THE EXECUTABLE
+- Named GlobalBlendSpace compatibility shim for pA8xxaySl7A: validates the handle
+  and stores the requested blend state. Renderer color conversion is unchanged.
+- Partial stack dumps at an unreadable stack boundary, plus frame-pointer traces.
+- Clear GTA6 Test 01 banner so we can identify the executable in a crash report.
+The original generic import stub already returned success. This shim alone is
+not expected to guarantee progress; the caller trace is needed if the assertion persists.
+
+COMPATIBILITY START PROFILE
+Uses the existing --redzone, --guest-tsc, image-readback/synchronization,
+--flush-draws 1, --tessellation, and --occlusion-queries options, plus guest logging
+and shader caching. This combination can be dramatically slower and may expose
+other emulator limitations. No simulation shaders or engine assertions are skipped.
+
+TEST LIMITS
+The Windows build/regression/--help checks are recorded in BUILD-RESULT.txt.
+No GTA6 game files were available to run here. Actual gameplay and rendering still
+need your test. The interactive Windows launcher flow has not been run here.

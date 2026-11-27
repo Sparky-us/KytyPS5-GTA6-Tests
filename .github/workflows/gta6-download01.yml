@@ -1,0 +1,48 @@
+name: GTA6 Test 01 - ready-to-run download
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [gta6-download-01]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the successful Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: GTA6-Test01-Windows
+          run-id: 45929857385
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: downloaded-windows
+
+      - name: Verify runtime and prepare the direct launchers
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root = Path('downloaded-windows')
+          Path('artifacts').mkdir(exist_ok=True)
+          with zipfile.ZipFile('artifacts/windows-ci.zip', 'w', zipfile.ZIP_DEFLATED) as z:
+              for p in root.rglob('*'):
+                  if p.is_file():
+                      z.write(p, p.relative_to(root))
+          PY
+          python packaging/package_windows.py artifacts/windows-ci.zip --commit 6dd1568b0d0627397bd03c25b2ae3cb83a2bbd22
+
+      - name: Upload ready-to-run Windows package
+        uses: actions/upload-artifact@v4
+        with:
+          name: GTA6-Test01-Windows-Ready
+          path: artifacts/GTA6-Test01-Windows/**
+          if-no-files-found: error
+          retention-days: 30
