@@ -1,4 +1,4 @@
-name: GTA6 Test 01 - fresh baseline launcher
+name: GTA6 Test 01 - compatibility shader validation launcher
 
 on:
   push:
@@ -28,13 +28,13 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $out = Join-Path $env:RUNNER_TEMP 'nocache-release'
           New-Item -ItemType Directory -Path $out | Out-Null
-          $files = @('Launch-NoCache.ps1', 'START-GTA6-NOCACHE.cmd', 'NOCACHE-START-HERE.txt')
+          $files = @('Launch-NoCache.ps1', 'START-GTA6-COMPAT-VALIDATE.cmd', 'NOCACHE-START-HERE.txt')
           foreach ($name in $files) {
               $source = Join-Path (Join-Path $env:GITHUB_WORKSPACE 'packaging') $name
               $content = [IO.File]::ReadAllText($source) -replace "\r?\n", "`r`n"
               [IO.File]::WriteAllText((Join-Path $out $name), $content)
           }
-          $filename = 'GTA6-Test01-NoCache-Launcher.zip'
+          $filename = 'GTA6-Test01-Compat-Validate.zip'
           $zip = Join-Path $out $filename
           Compress-Archive -LiteralPath @($files | ForEach-Object { Join-Path $out $_ }) -DestinationPath $zip
           $sha = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -42,13 +42,13 @@ jobs:
           Set-Content -LiteralPath $checksum -Value "$sha  $filename" -Encoding Ascii
           $notes = Join-Path $out 'release-notes.txt'
           Set-Content -LiteralPath $notes -Value @'
-          Extract this launcher update beside START-GTA6.cmd in your existing Test 01 folder and run START-GTA6-NOCACHE.cmd.
+          Extract this launcher update beside START-GTA6.cmd in your existing Test 01 folder and run START-GTA6-COMPAT-VALIDATE.cmd.
 
-          It skips shader preloading and runs with a fresh Vulkan pipeline cache. After exit, the report includes the process exit code and captured Windows module ranges.
+          Uses the compatibility profile with built-in SPIR-V validation and fresh caches. After exit, the report includes the process exit code and captured Windows module ranges.
 
-          Verified cache isolation, argument passing, crash exit handling, and module reporting on Windows with a test executable. A gameplay run needs the existing Test 01 build and your game files.
+          Verified both launcher profiles, cache isolation, argument passing, crash exit handling, and module reporting on Windows with a test executable.
           '@
-          $tag = 'gta6-test01-nocache1'
+          $tag = 'gta6-test01-compat-validate1'
           gh release create $tag $zip $checksum --target $env:GITHUB_SHA `
-              --title 'GTA6 Test 01 - Fresh baseline launcher' --prerelease --notes-file $notes
+              --title 'GTA6 Test 01 - Compatibility shader validation launcher' --prerelease --notes-file $notes
           if ($LASTEXITCODE -ne 0) { throw 'Could not publish the release' }

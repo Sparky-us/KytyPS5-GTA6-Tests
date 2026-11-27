@@ -1,6 +1,7 @@
 param(
     [string]$GamePath = $env:GTA6_TEST_GAME_PATH,
     [string]$RuntimeSha256 = '238aa4cc95f2242a974b74a3f7f05d39b90c2b5b5b31ff5baaf4896bf9eadb0a',
+    [switch]$ValidateCompatShaders,
     [switch]$NonInteractive
 )
 
@@ -48,18 +49,28 @@ try {
     $stamp = (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0,8)
     $logDir = Join-Path $PSScriptRoot 'logs'
     New-Item -ItemType Directory -Force -Path $logDir | Out-Null
-    $report = Join-Path $logDir ("nocache-baseline-$stamp.txt")
-    $stdout = Join-Path $logDir ("nocache-baseline-$stamp-stdout.tmp")
-    $stderr = Join-Path $logDir ("nocache-baseline-$stamp-stderr.tmp")
+    $profile = 'nocache-baseline'
+    $compatFlags = ''
+    $validation = 'disabled'
+    if ($ValidateCompatShaders) {
+        $profile = 'compat-validate'
+        $compatFlags = '--redzone --guest-tsc --readback-linear-images --readback-tiled-images --readback-storage-images --sync-raw-image-buffers --flush-draws 1 --tessellation --occlusion-queries'
+        $validation = 'enabled'
+    }
+    $report = Join-Path $logDir ("$profile-$stamp.txt")
+    $stdout = Join-Path $logDir ("$profile-$stamp-stdout.tmp")
+    $stderr = Join-Path $logDir ("$profile-$stamp-stderr.tmp")
     $work = Join-Path $PSScriptRoot ("diagnostic-runs\$stamp")
     New-Item -ItemType Directory -Force -Path $work | Out-Null
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'patched\assets') -Destination (Join-Path $work 'assets') -Recurse
     $arguments = '--game "' + $GamePath + '" --printf-direction Console'
+    if ($ValidateCompatShaders) { $arguments += ' ' + $compatFlags + ' --shader-validation' }
     $header = @(
-        'GTA6 Test 01 - fresh baseline diagnostic launcher v2'
+        "GTA6 Test 01 - $profile"
         'Shader-store preloading: disabled (no --shader-cache)'
         'Vulkan pipeline cache: fresh working directory; existing test caches retained'
-        'Compatibility flags: none'
+        "Compatibility flags: $compatFlags"
+        "Shader validation: $validation"
         "Runtime SHA256: $RuntimeSha256"
         "Game input: $GamePath"
         "Working directory: $work"
@@ -67,7 +78,7 @@ try {
         ''
     ) -join "`r`n"
     [IO.File]::WriteAllText($report, $header, $utf8)
-    Write-Host "Starting a fresh baseline. Report: $report"
+    Write-Host "Starting $profile. Report: $report"
     Write-Host 'Close the game window if it hangs. The report opens after the process exits.'
 
     $process = Start-Process -FilePath $runtime -ArgumentList $arguments -WorkingDirectory $work `
