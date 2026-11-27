@@ -103,6 +103,7 @@ KYTY_SYSV_ABI int VideoOutConfigureOutput(int handle, uint64_t mode,
                                           const VideoOutOutputOptions* options, void* reserved_ptr,
                                           uint64_t reserved);
 KYTY_SYSV_ABI int VideoOutSetWindowModeMargins(int handle, int top, int bottom);
+KYTY_SYSV_ABI int VideoOutSetGlobalBlendSpace(int handle, uint32_t space, uint32_t option);
 KYTY_SYSV_ABI int VideoOutLatencyControlWaitBeforeInput(int handle);
 KYTY_SYSV_ABI int VideoOutLatencyMeasureSetStartPoint(int handle, uint32_t point);
 KYTY_SYSV_ABI int VideoOutColorSettingsSetGamma(VideoOutColorSettings* settings, float gamma);

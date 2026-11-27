@@ -193,6 +193,8 @@ struct VideoOutConfig {
 	uint32_t                            slave_count = 0;
 	int                                 flip_rate   = 0;
 	uint64_t                            output_mode = VIDEO_OUT_OUTPUT_MODE_DEFAULT;
+	uint32_t                            global_blend_space = 0;
+	uint32_t                            global_blend_option = 0;
 	uint64_t                            pre_vblanks = 0;
 	uint64_t                            flip_vblank = 0; // vblank_status.count at the last flip.
 	VideoOutFlipStatus                  flip_status;
@@ -661,6 +663,8 @@ int VideoOutDriver::Impl::Open(int bus_type, int index) {
 		EXIT("video-out port generation wrapped\n");
 	}
 	config.output_mode               = VIDEO_OUT_OUTPUT_MODE_DEFAULT;
+	config.global_blend_space        = 0;
+	config.global_blend_option       = 0;
 	config.flip_status               = VideoOutFlipStatus();
 	config.flip_status.flipArg       = -1;
 	config.flip_status.currentBuffer = -1;
@@ -1862,6 +1866,22 @@ KYTY_SYSV_ABI int VideoOutSetWindowModeMargins(int handle, int top, int bottom) 
 	     "\t bottom = %d\n",
 	     top, bottom);
 
+	return OK;
+}
+
+// Experimental bring-up shim: retain the requested state and acknowledge a valid port.
+// The presenter does not yet apply this blend-space conversion.
+KYTY_SYSV_ABI int VideoOutSetGlobalBlendSpace(int handle, uint32_t space, uint32_t option) {
+	PRINT_NAME();
+	auto* ctx = DriverState().Get(handle);
+	if (ctx == nullptr) return VIDEO_OUT_ERROR_INVALID_HANDLE;
+	{
+		Common::LockGuard lock(ctx->mutex);
+		ctx->global_blend_space = space;
+		ctx->global_blend_option = option;
+	}
+	std::printf("GTA6 Test 01: GlobalBlendSpace shim handle=%d space=%u option=%u\n",
+	            handle, space, option);
 	return OK;
 }
 

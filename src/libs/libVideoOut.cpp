@@ -33,6 +33,7 @@ LIB_DEFINE(InitVideoOut_1) {
 	LIB_FUNC("zgXifHT9ErY", VideoOut::VideoOutIsFlipPending);
 	LIB_FUNC("1FZBKy8HeNU", VideoOut::VideoOutGetVblankStatus);
 	LIB_FUNC("MTxxrOCeSig", VideoOut::VideoOutSetWindowModeMargins);
+	LIB_FUNC("pA8xxaySl7A", VideoOut::VideoOutSetGlobalBlendSpace);
 	LIB_FUNC("kmSe30JTs+E", VideoOut::VideoOutAddOutputModeEvent);
 	LIB_FUNC("U2JJtSqNKZI", VideoOut::VideoOutGetEventId);
 	LIB_FUNC("rWUTcKdkUzQ", VideoOut::VideoOutGetEventData);

@@ -53,6 +53,13 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 include("${KYTY_SOURCE_DIR}/utils.cmake")
 include(CTest)
 
+add_executable(fault_diagnostics_tests EXCLUDE_FROM_ALL
+    "${KYTY_TESTS_DIR}/FaultDiagnosticsStandaloneTests.cpp")
+target_include_directories(fault_diagnostics_tests PRIVATE "${KYTY_SOURCE_DIR}")
+if(BUILD_TESTING)
+    add_test(NAME fault_diagnostics COMMAND $<TARGET_FILE:fault_diagnostics_tests>)
+endif()
+
 option(KYTY_ENABLE_CLANG_TIDY "Run clang-tidy checks during builds" OFF)
 
 set(KYTY_BUILD_ORIGIN "Source" CACHE STRING "Build provenance shown in diagnostics")

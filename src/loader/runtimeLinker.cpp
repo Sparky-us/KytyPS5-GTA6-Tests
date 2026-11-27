@@ -20,6 +20,7 @@
 #include "kernel/memory.h"
 #include "kernel/pthread.h"
 #include "loader/elf.h"
+#include "loader/faultDiagnostics.h"
 #include "loader/gamePatch.h"
 #include "loader/guestInstructionPatcher.h"
 #include "loader/symbolDatabase.h"
@@ -686,13 +687,23 @@ bool KytyExceptionHandler(const Common::HostException::ExceptionInfo& exception_
 			}
 			std::printf("\n");
 		}
-		if (IsReadableRange(info->rsp, 32 * sizeof(uint64_t))) {
-			const auto* stack = reinterpret_cast<const uint64_t*>(info->rsp);
-			std::printf("stack:");
-			for (int i = 0; i < 32; i++) {
+		uint64_t stack[32] {};
+		const auto stack_words = FaultDiagnostics::CaptureStackWords(
+		    info->rsp, std::span<uint64_t>(stack), IsReadableRange);
+		std::printf("GTA6 Test 01: readable stack words=%zu/32\n", stack_words);
+		if (stack_words != 0) {
+			std::printf("stack (first word may be the immediate caller's return address):");
+			for (size_t i = 0; i < stack_words; i++) {
 				std::printf("%s %016" PRIx64, (i % 4 == 0) ? "\n " : "", stack[i]);
 			}
 			std::printf("\n");
+		}
+		void* frames[20] {};
+		const int depth = WalkGuestStack(info->rbp, info->rsp, frames, 20);
+		std::printf("guest frame-pointer trace: %d frame(s)\n", depth);
+		for (int i = 0; i < depth; ++i) {
+			std::printf("  #%d 0x%016" PRIx64 "\n", i,
+			            reinterpret_cast<uint64_t>(frames[i]));
 		}
 		std::fflush(stdout);
 	}

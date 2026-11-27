@@ -469,6 +469,7 @@ static bool ParseArgs(int argc, char* argv[], RunOptions& options, bool& show_he
 }
 
 static int Main(int argc, char* argv[]) {
+	::printf("GTA6 Gameplay Test 01 - experimental video-output shim and crash diagnostics\n");
 	InitializeThreads();
 
 	RunOptions options;

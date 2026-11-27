@@ -1,0 +1,80 @@
+GTA6 GAMEPLAY TEST 01
+Goal: reach controllable gameplay. Performance and image quality are secondary.
+
+PACKAGE STATUS
+The source-and-launchers package does NOT contain a newly compiled Windows executable.
+It contains launchers you can use immediately with your current November 26 build,
+plus the reviewed source patch and a Windows build workflow.
+A compiled package will additionally contain patched\kyty_emulator.exe.
+Neither package is a verified gameplay fix.
+
+FIRST TEST - AVAILABLE NOW
+1. Extract this entire ZIP to its own folder, for example D:\Emulators\GTA6-Test01.
+   Do not extract it over your existing Kyty installation or game directory.
+2. Close Kyty and double-click Setup.cmd.
+3. Enter your ORIGINAL Kyty folder and the existing GTA6 game path when prompted.
+4. Double-click 01-Current-Compatibility.cmd.
+5. After the game closes, its log opens in Notepad. Send that complete log and
+   describe the furthest screen reached. If you reach gameplay, say whether you
+   can move the character and whether the scene keeps updating.
+6. For a comparison using the same isolated runtime and defaults, run
+   00-Current-Baseline.cmd. Each run writes a different file in logs.
+
+WHEN THE COMPILED PATCH ARRIVES
+1. Put its patched folder alongside these launchers, then rerun Setup.cmd.
+2. Run 02-Patched-Baseline.cmd first. Check that the log begins with
+   "GTA6 Gameplay Test 01" and contains the new readable-stack report on a crash.
+3. Then run 03-Patched-Compatibility.cmd.
+4. The exact source commit and build checks will be included with the compiled package.
+
+WHAT THE COMPATIBILITY PROFILE CHANGES
+- Windows guest red-zone protection.
+- Guest CPU time counter at the PS5's 1.6 GHz.
+- Linear, tiled, and storage-image readback; raw image-buffer synchronization.
+- GPU submission after each draw.
+- Tessellation and real occlusion queries.
+- Guest printf logging to the console, captured in the log.
+All options exist in the source for build 61db2f8. This combination is unverified
+for GTA6 and can be dramatically slower. The options also change several things
+at once; any improvement will need follow-up tests to isolate the helpful option.
+
+WHAT THE SOURCE PATCH CHANGES
+- Registers the unresolved pA8xxaySl7A video-output function as an experimental
+  GlobalBlendSpace shim. It validates the port and stores the requested state;
+  the renderer does not yet apply this blend-space conversion.
+- Important: the original generic unresolved-import stub already returns zero.
+  Replacing it with this shim is not expected, by itself, to guarantee progress.
+- Preserves readable stack words when a later word would cross a stack boundary.
+  Your supplied crash stack pointer is near a boundary, making this diagnostic useful.
+- Prints frame-pointer return addresses and a clear test-build banner.
+- Does not bypass the game engine's fatal assertion or skip simulation shaders.
+
+FILES AND SAVES
+Setup copies only emulator executables/DLLs and assets. It does not copy the
+roughly 200 GB game. Your existing installation is used only as a copy source.
+The game files are loaded from their existing location.
+The test runtimes have separate generated saves/caches because each runs from
+its own working directory. This is a new test profile; existing saves/settings
+are not imported. Patched baseline and patched compatibility share one test runtime.
+Later Setup runs can overwrite copied runtime files; keep a separate folder per revision.
+
+ROLLBACK
+Close the test and launch Kyty from your original installation.
+There is no system-wide installation or registry change to undo.
+
+VALIDATION
+The stack-diagnostic regression checks passed locally with GCC, including a
+19-word readable stack followed by an unreadable boundary and overflow cases.
+The source patch applies cleanly to the exact upstream revision below.
+The Windows executable build, Windows launchers, and GTA6 gameplay have not
+been run in the preparation environment. Windows CI checks are the next step.
+
+SOURCE BASE
+https://github.com/KytyPS5/KytyPS5
+61db2f8874d4a94fd2908a87cefa973ddc48ef6e
+
+RELATED EXPERIMENTAL REPORT
+https://github.com/KytyPS5/KytyPS5/issues/2552#issuecomment-7184648265
+The broader community patch is not applied wholesale: it overlaps current
+upstream changes and includes shader-skipping workarounds that can leave
+simulation state inconsistent. The first revision isolates our known log evidence.

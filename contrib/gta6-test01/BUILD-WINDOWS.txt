@@ -1,0 +1,36 @@
+WINDOWS BUILD PLAN - GTA6 TEST 01
+
+This package includes source changes, not a prebuilt Windows executable.
+The prepared workflow builds on GitHub's Windows 2025 runner using Visual Studio Clang.
+It builds the emulator without the Qt launcher; your original install supplies the
+launcher if wanted, and this package supplies direct test launchers.
+
+Base revision:
+61db2f8874d4a94fd2908a87cefa973ddc48ef6e
+Repository:
+https://github.com/KytyPS5/KytyPS5
+
+Reproduce the source changes in a fresh checkout:
+  git clone https://github.com/KytyPS5/KytyPS5.git KytyPS5-GTA6-Test01
+  cd KytyPS5-GTA6-Test01
+  git checkout -b gta6-test-01 61db2f8874d4a94fd2908a87cefa973ddc48ef6e
+  git apply --check PATH-TO-PACKAGE/source/gta6-test01.patch
+  git apply PATH-TO-PACKAGE/source/gta6-test01.patch
+  git submodule update --init --recursive
+
+The patch contains .github/workflows/gta6-test01.yml. In an isolated fork with
+Actions enabled, pushing the complete gta6-test-01 branch starts one Windows
+build. It does not publish a release or open an upstream pull request.
+The resulting artifact is named GTA6-Test01-Windows.
+
+The workflow must complete these checks before the binary is called build-tested:
+- Full Windows emulator compilation.
+- Fault-diagnostic boundary regression test.
+- Emulator --help smoke test confirming the GTA6 Test 01 banner.
+- Runtime packaging, exact source commit, and SHA-256 hashes.
+
+These checks do not establish that GTA6 reaches gameplay. That requires a run
+on your Windows PC with your existing game files.
+
+GitHub account sign-in is needed to create the isolated fork and use its Windows
+runner. No passwords, keys, or game files belong in the repository or test package.
