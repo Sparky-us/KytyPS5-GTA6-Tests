@@ -1,0 +1,21 @@
+GTA6 TEST 01 - FRESH BASELINE DIAGNOSTIC LAUNCHER
+
+1. Extract this small update into the existing Test 01 folder containing
+   START-GTA6.cmd, game-path.txt, and the patched folder.
+2. Run START-GTA6-NOCACHE.cmd. It reuses your saved game path. You can also
+   drag your game folder or exact eboot.bin onto this new launcher.
+3. Let it load. After a crash or after closing the game, the combined report
+   opens in Notepad. Send that report and describe the last visible screen.
+
+This launch omits --shader-cache and all compatibility flags. It uses a new
+diagnostic-runs subfolder on every run, with fresh saves and an empty Vulkan
+pipeline cache. The existing game, saves, and caches remain available. Only
+the small bundled runtime assets are copied into each new test folder.
+
+The report includes the loaded Windows DLL names and address ranges, so a
+reported host fault can be matched to a module when that range was captured.
+An address match identifies where a fault occurred, not its underlying cause.
+
+The Test 01 executable is unchanged. This is a diagnostic experiment, not a
+confirmed gameplay fix. No game files are included. No administrator access,
+system installation, or permanent PowerShell policy change is required.
