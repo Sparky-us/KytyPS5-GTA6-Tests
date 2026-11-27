@@ -6,7 +6,7 @@ on:
     branches: [gta6-download-01]
 
 permissions:
-  contents: read
+  contents: write
   actions: read
 
 jobs:
@@ -46,3 +46,29 @@ jobs:
           path: artifacts/GTA6-Test01-Windows/**
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish a public experimental download
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag=gta6-test01-6dd1568
+          cd artifacts
+          sha256sum GTA6-Test01-Windows.zip > GTA6-Test01-Windows.zip.sha256
+          cat > release-notes.md <<'EOF'
+          Experimental Windows build from source commit 6dd1568b0d0627397bd03c25b2ae3cb83a2bbd22.
+
+          Extract GTA6-Test01-Windows.zip and run START-GTA6.cmd. Select your existing game folder when prompted. START-GTA6-BASELINE.cmd is available for comparison.
+
+          Includes a named VideoOut compatibility shim, improved crash diagnostics, source, and licenses. Windows compilation, the stack diagnostic test, and the command-line smoke check passed. GTA VI gameplay has not been verified; this is a diagnostic test build, not a confirmed gameplay fix. No game files are included.
+          EOF
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release already exists; refusing to replace its files."
+            exit 1
+          fi
+          gh release create "$tag" GTA6-Test01-Windows.zip GTA6-Test01-Windows.zip.sha256 \
+            --target 6dd1568b0d0627397bd03c25b2ae3cb83a2bbd22 \
+            --title "GTA6 Test 01 - Experimental Windows build" \
+            --prerelease --notes-file release-notes.md
